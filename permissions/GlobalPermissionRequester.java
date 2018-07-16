@@ -1,4 +1,4 @@
-package andlib.permissions;
+package com.gplio.andlib.permissions;
 
 import android.Manifest;
 import android.app.Activity;

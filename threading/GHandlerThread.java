@@ -1,4 +1,4 @@
-package andlib.threading;
+package com.gplio.andlib.threading;
 
 import android.os.Handler;
 import android.os.HandlerThread;

@@ -8,8 +8,7 @@ import android.util.Log;
 
 import com.gplio.andlib.recognition.RecognitionCallback;
 import com.gplio.andlib.recognition.RecognitionResult;
-import com.gplio.faceoff.MainActivity;
-import com.gplio.faceoff.RecognitionResult;
+import com.gplio.andlib.threading.GHandlerThread;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -17,8 +16,6 @@ import java.util.List;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
-
-import andlib.threading.GHandlerThread;
 
 import static android.opengl.Matrix.multiplyMM;
 import static android.opengl.Matrix.orthoM;

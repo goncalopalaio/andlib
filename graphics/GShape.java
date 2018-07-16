@@ -1,4 +1,4 @@
-package andlib.graphics;
+package com.gplio.andlib.graphics;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;

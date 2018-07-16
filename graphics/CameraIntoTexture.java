@@ -1,4 +1,4 @@
-package andlib.graphics;
+package com.gplio.andlib.graphics;
 
 
 import android.graphics.SurfaceTexture;

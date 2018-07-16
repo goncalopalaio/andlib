@@ -1,4 +1,4 @@
-package andlib.graphics;
+package com.gplio.andlib.graphics;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -6,6 +6,8 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.util.Log;
 
+import com.gplio.andlib.recognition.RecognitionCallback;
+import com.gplio.andlib.recognition.RecognitionResult;
 import com.gplio.faceoff.MainActivity;
 import com.gplio.faceoff.RecognitionResult;
 
@@ -30,6 +32,7 @@ public class CameraRenderer implements GLSurfaceView.Renderer {
     private static final String TAG = "CameraRenderer";
 
     private final Context context;
+    private final RecognitionCallback cb;
     private final CameraIntoTexture cameraIntoTexture;
     private final GHandlerThread<RecognitionResult> recognitionThread;
 
@@ -68,9 +71,10 @@ public class CameraRenderer implements GLSurfaceView.Renderer {
     //
     private ByteBuffer screenBuffer;
 
-    public CameraRenderer(Context context, CameraIntoTexture cameraIntoTexture, GHandlerThread<RecognitionResult> recognitionThread) {
+    public CameraRenderer(Context context, RecognitionCallback cb, CameraIntoTexture cameraIntoTexture, GHandlerThread<RecognitionResult> recognitionThread) {
 
         this.context = context;
+        this.cb = cb;
         this.cameraIntoTexture = cameraIntoTexture;
         this.recognitionThread = recognitionThread;
     }
@@ -86,7 +90,7 @@ public class CameraRenderer implements GLSurfaceView.Renderer {
             @Override
             public RecognitionResult work() {
                 Log.d(TAG, "work: " + bitmap.getWidth() + " : " + bitmap.getHeight());
-                RecognitionResult result = ((MainActivity) context).infer(bitmap);
+                RecognitionResult result = cb.infer(bitmap);
                 result.bitmap = bitmap;
                 return result;
             }

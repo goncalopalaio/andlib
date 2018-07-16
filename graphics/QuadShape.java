@@ -13,17 +13,22 @@ public class QuadShape extends GShape {
     private static FloatBuffer sUvsBuffer = null;
     private static int sPositionsLength;
     private static int sUvsLength;
+    private final float scale;
 
     public QuadShape() {
-        vertexBuffer = getPositionBuffer();
+        this(1.0f);
+    }
+    public QuadShape(float scale) {
+        vertexBuffer = getPositionBuffer(scale);
         uvsBuffer = getUvsBuffer();
         vertexStride = coordsPerVertex * BYTES_PER_FLOAT;
         vertexCount =  sPositionsLength / coordsPerVertex;
+        this.scale = scale;
     }
 
-    private static FloatBuffer getPositionBuffer() {
+    private static FloatBuffer getPositionBuffer(float scale) {
         if (sPositionsBuffer == null) {
-            sPositionsBuffer = allocatePositionBuffer();
+            sPositionsBuffer = allocatePositionBuffer(scale);
         }
         sPositionsBuffer.position(0);
         return sPositionsBuffer;
@@ -37,14 +42,14 @@ public class QuadShape extends GShape {
         return sUvsBuffer;
     }
 
-    private static FloatBuffer allocatePositionBuffer() {
+    private static FloatBuffer allocatePositionBuffer(float scale) {
         float[] positions = {
-                0.5f, -0.5f, 0f,
-                0.5f, 0.5f, 0f,
-                -0.5f, 0.5f, 0f,
-                -0.5f, 0.5f, 0f,
-                -0.5f, -0.5f, 0f,
-                0.5f, -0.5f, 0f
+                0.5f * scale, -0.5f * scale, 0f,
+                0.5f * scale, 0.5f * scale, 0f,
+                -0.5f * scale, 0.5f * scale, 0f,
+                -0.5f * scale, 0.5f * scale, 0f,
+                -0.5f * scale, -0.5f * scale, 0f,
+                0.5f * scale, -0.5f * scale, 0f
         };
         sPositionsLength = positions.length;
         return allocateBuffer(positions);

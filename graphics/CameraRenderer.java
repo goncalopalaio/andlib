@@ -134,7 +134,7 @@ public class CameraRenderer implements GLSurfaceView.Renderer {
         GLES20.glClearColor(0.5f, (float) Math.sin(tick) , 0.4f, 1.0f);
 
         cameraIntoTexture.update();
-        mainShader.draw(shapes, tick);
+        mainShader.draw(shapes, tick, width, height);
 
         postScreenBuffer();
         tick += 0.1f;

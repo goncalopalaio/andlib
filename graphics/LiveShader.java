@@ -1,13 +1,11 @@
 package com.gplio.andlib.graphics;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.gplio.andlib.files.ExternalFileObserver;
 import com.gplio.andlib.files.TextFiles;
-import com.gplio.andlib.threading.GHandlerThread;
 
 /**
  * Created by goncalopalaio on 19/07/18.
@@ -65,8 +63,8 @@ public class LiveShader extends GShader implements ExternalFileObserver.Listener
     @Override
     public void onEvent() {
 
-        String updatedVertexShader = TextFiles.readText(folderPath + vertexShaderFile);
-        String updatedFragmentShader = TextFiles.readText(folderPath + fragmentShaderFile);
+        String updatedVertexShader = TextFiles.readTextFromSdcard(folderPath + vertexShaderFile, "");
+        String updatedFragmentShader = TextFiles.readTextFromSdcard(folderPath + fragmentShaderFile, "");
 
         if (updatedVertexShader.isEmpty() || updatedFragmentShader.isEmpty()) {
             log("Updated vertex or fragment shader was empty");
@@ -79,17 +77,6 @@ public class LiveShader extends GShader implements ExternalFileObserver.Listener
         dirty = true;
 
         log("Marked as dirty");
-    }
-
-    private boolean useFallbackShader() {
-        vertexShaderCode = defaultVertexShaderCode;
-        fragmentShaderCode = defaultFragmentShaderCode;
-        boolean error = init(context);
-
-        if (error) {
-            log("Error compiling with default strings");
-        }
-        return error;
     }
 
     public boolean isDirty() {

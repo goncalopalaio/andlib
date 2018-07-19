@@ -5,19 +5,19 @@ package com.gplio.andlib.graphics;
  */
 
 public class GenericShader extends GShader {
-    private static String vertex =
+    protected static String defaultVertexShader =
             "attribute vec4 position;" +
             "attribute vec2 uv;" +
             "void main() {" +
             "gl_Position = position;" +
             "}";
 
-    private static String fragment =
+    protected static String defaultFragmentShader =
             "precision mediump float;" +
                     "void main() {" +
                     "gl_FragColor = vec4(1.0,0.0,0.0,1.0);" +
                     "}";
     public GenericShader() {
-        super(vertex, fragment);
+        super(defaultVertexShader, defaultFragmentShader);
     }
 }

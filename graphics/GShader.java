@@ -17,8 +17,8 @@ import java.util.List;
 
 public class GShader {
 
-    private final String vertexShaderCode;
-    private final String fragmentShaderCode;
+    protected String vertexShaderCode;
+    protected String fragmentShaderCode;
     private String assetTextureName = null;
     private int textureOES = -1;
     private int program;
@@ -51,7 +51,17 @@ public class GShader {
 
         // attrib locations
         positionLoc = GLES20.glGetAttribLocation(program, "position");
+
+        if (positionLoc < 0) {
+            Log.e("init", "init: attribute positionLoc not found");
+        }
+
         uvLoc = GLES20.glGetAttribLocation(program, "uv");
+
+        if (uvLoc < 0) {
+            Log.e("init", "init: attribute uvLoc not found");
+        }
+
 
         // uniform locations
         GLES20.glGetUniformLocation(program, "color");
@@ -75,13 +85,14 @@ public class GShader {
             textureBitmap = BitmapFactory.decodeStream(
                     context.getAssets().open(assetTextureName));
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.e("init", "init: while decoding " + assetTextureName + " " + e);
         }
 
         if (textureBitmap == null) {
-            Log.e("init", "init: texture open failed");
-            return true;
+            Log.e("init", "init: texture open failed. Ignoring texture.");
+            return false;
         }
+
 
         // upload texture
         GLES20.glUseProgram(program);

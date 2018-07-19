@@ -4,14 +4,16 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 /**
  * Created by goncalopalaio on 27/05/18.
  */
 
-public class GHandlerThread<O> {
+public class GHandlerThread<W> {
     private final String name;
+    @Nullable
     private HandlerThread handlerThread;
     private Handler backgroundHandler;
     private Handler deliveryHandler;
@@ -22,36 +24,38 @@ public class GHandlerThread<O> {
     }
 
     @SuppressWarnings("unchecked")
-    public void resume(final Looper deliverToLooper, final Delivery delivery) {
+    public void resume(final Looper deliverToLooper, final DeliveryEvent deliveryEvent) {
         this.deliveryHandler = new Handler(deliverToLooper) {
             @Override
             public void handleMessage(Message msg) {
                 switch (msg.what) {
                     case DeliveryState.STARTED:
-                        delivery.onStart();
+                        deliveryEvent.onStart();
                         break;
                     case DeliveryState.ERRORED:
-                        delivery.onError();
+                        deliveryEvent.onError();
                         break;
                     case DeliveryState.ENDED:
-                        delivery.onEnd(msg.obj);
+                        deliveryEvent.onEnd(msg.obj);
                         break;
                     default:
-                        Log.d(getClass().getName(), "delivery handler: unknown message");
+                        Log.d(getClass().getName(), "deliveryEvent handler: unknown message");
                 }
             }
         };
 
+        Log.d(getClass().getName(), "resume : starting handler thread");
         handlerThread = new HandlerThread(name);
         handlerThread.start();
         backgroundHandler = new Handler(handlerThread.getLooper());
+
     }
-    private Runnable getJobRunnable(final Job<O> job) {
+    private Runnable getJobRunnable(final Job<W> job) {
         return new Runnable() {
             @Override
             public void run() {
                 deliveryHandler.sendMessage(deliveryHandler.obtainMessage(DeliveryState.STARTED));
-                O output = job.work();
+                W output = job.work();
                 if (output == null) {
                     deliveryHandler.sendMessage(deliveryHandler.obtainMessage(DeliveryState.ERRORED));
                 } else {
@@ -63,16 +67,19 @@ public class GHandlerThread<O> {
             }
         };
     }
-    public void post(final Job<O> job) {
+    public void post(final Job<W> job) {
         backgroundHandler.post(getJobRunnable(job));
     }
 
-    public void postDelayed(final Job<O> job, long delayMillis) {
+    public void postDelayed(final Job<W> job, long delayMillis) {
         backgroundHandler.postDelayed(getJobRunnable(job), delayMillis);
     }
 
     public void pause() {
-        handlerThread.quit();
+        if (handlerThread != null) {
+            handlerThread.quit();
+        }
+
     }
 
     private static class DeliveryState {
@@ -85,7 +92,7 @@ public class GHandlerThread<O> {
         O work();
     }
 
-    public interface Delivery<O> {
+    public interface DeliveryEvent<O> {
         void onStart();
         void onError();
         void onEnd(O obj);

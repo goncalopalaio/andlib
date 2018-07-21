@@ -29,6 +29,7 @@ public class GShader {
     private int uTimeLoc;
     private int uWidthLoc;
     private int uHeightLoc;
+    private int uViewProjectionLoc;
 
     public GShader (String vertexShaderCode, String fragmentShaderCode) {
         this.vertexShaderCode = vertexShaderCode;
@@ -71,6 +72,7 @@ public class GShader {
 
         uWidthLoc = GLES20.glGetUniformLocation(program, "width");
         uHeightLoc = GLES20.glGetUniformLocation(program, "height");
+        uViewProjectionLoc = GLES20.glGetUniformLocation(program, "vp");
 
         ShaderUtil.checkGLError("init", "end of init");
 
@@ -115,10 +117,15 @@ public class GShader {
         return false;
     }
 
-    public void draw(List<GShape> shapes, float time, int width, int height) {
+    public void draw(List<GShape> shapes, float time, int width, int height, float[] viewProjectionMatrix) {
         GLES20.glUseProgram(program);
         GLES20.glEnableVertexAttribArray(positionLoc);
         GLES20.glEnableVertexAttribArray(uvLoc);
+
+        GLES20.glUniform1f(uTimeLoc, time);
+        GLES20.glUniform1f(uWidthLoc, width);
+        GLES20.glUniform1f(uHeightLoc, height);
+        GLES20.glUniformMatrix4fv(uViewProjectionLoc, 1, false, viewProjectionMatrix, 0);
 
         for (GShape shape : shapes) {
             GLES20.glVertexAttribPointer(
@@ -131,9 +138,6 @@ public class GShader {
                         false, 0, shape.uvsBuffer);
             }
 
-            GLES20.glUniform1f(uTimeLoc, time);
-            GLES20.glUniform1f(uWidthLoc, width);
-            GLES20.glUniform1f(uHeightLoc, height);
 
             if (assetTextureName != null) {
                 GLES20.glActiveTexture(GLES20.GL_TEXTURE0);

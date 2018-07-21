@@ -7,5 +7,10 @@ import android.graphics.Bitmap;
  */
 
 public class RecognitionResult {
+    public final int i;
     public Bitmap bitmap;
+
+    public RecognitionResult(int i) {
+        this.i = i;
+    }
 }

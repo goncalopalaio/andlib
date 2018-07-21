@@ -13,22 +13,29 @@ public class QuadShape extends GShape {
     private static FloatBuffer sUvsBuffer = null;
     private static int sPositionsLength;
     private static int sUvsLength;
-    private final float scale;
+    private final float scaleX;
+    private final float scaleY;
 
     public QuadShape() {
-        this(1.0f);
+        this(1.0f,1.0f, 0.0f, 0.0f);
     }
-    public QuadShape(float scale) {
-        vertexBuffer = getPositionBuffer(scale);
+
+    public QuadShape(float scaleX, float scaleY) {
+        this(scaleX, scaleY, 0.0f, 0.0f);
+    }
+
+    public QuadShape(float scaleX, float scaleY, float offsetX, float offsetY) {
+        vertexBuffer = getPositionBuffer(scaleX, scaleY, offsetX, offsetY);
         uvsBuffer = getUvsBuffer();
         vertexStride = coordsPerVertex * BYTES_PER_FLOAT;
         vertexCount =  sPositionsLength / coordsPerVertex;
-        this.scale = scale;
+        this.scaleX = scaleX;
+        this.scaleY = scaleY;
     }
 
-    private static FloatBuffer getPositionBuffer(float scale) {
+    private static FloatBuffer getPositionBuffer(float scaleX, float scaleY, float offsetX, float offsetY) {
         if (sPositionsBuffer == null) {
-            sPositionsBuffer = allocatePositionBuffer(scale);
+            sPositionsBuffer = allocatePositionBuffer(scaleX, scaleY, offsetX, offsetY);
         }
         sPositionsBuffer.position(0);
         return sPositionsBuffer;
@@ -42,14 +49,14 @@ public class QuadShape extends GShape {
         return sUvsBuffer;
     }
 
-    private static FloatBuffer allocatePositionBuffer(float scale) {
+    private static FloatBuffer allocatePositionBuffer(float scaleX, float scaleY, float offsetX, float offsetY) {
         float[] positions = {
-                0.5f * scale, -0.5f * scale, 0f,
-                0.5f * scale, 0.5f * scale, 0f,
-                -0.5f * scale, 0.5f * scale, 0f,
-                -0.5f * scale, 0.5f * scale, 0f,
-                -0.5f * scale, -0.5f * scale, 0f,
-                0.5f * scale, -0.5f * scale, 0f
+                1.0f * scaleX  + offsetX, -1.0f * scaleY + offsetY, 0f,
+                1.0f * scaleX  + offsetX, 1.0f *  scaleY  + offsetY, 0f,
+                -1.0f * scaleX + offsetX, 1.0f *  scaleY  + offsetY, 0f,
+                -1.0f * scaleX + offsetX, 1.0f *  scaleY  + offsetY, 0f,
+                -1.0f * scaleX + offsetX, -1.0f * scaleY + offsetY, 0f,
+                1.0f * scaleX  + offsetX, -1.0f * scaleY + offsetY, 0f
         };
         sPositionsLength = positions.length;
         return allocateBuffer(positions);

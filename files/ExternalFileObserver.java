@@ -4,7 +4,7 @@ import android.os.FileObserver;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.gplio.fibrewallpaper.BuildConfig;
+import com.gplio.faceoff.BuildConfig;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -21,7 +21,7 @@ public class ExternalFileObserver extends FileObserver {
         super(path, FileObserver.ALL_EVENTS);
         listeners = new LinkedList<>();
 
-        if (BuildConfig.DEBUG) log("New ExternalFileObserver" + path);
+        log("New ExternalFileObserver" + path);
     }
 
     public void subscribe(Listener listener) {
@@ -30,7 +30,7 @@ public class ExternalFileObserver extends FileObserver {
             return;
         }
 
-        if (BuildConfig.DEBUG) log("subscribe ignored for " + listener);
+        log("subscribe ignored for " + listener);
     }
 
     public void unsubscribe(Listener listener) {

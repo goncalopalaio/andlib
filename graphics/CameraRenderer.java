@@ -39,9 +39,9 @@ public class CameraRenderer implements GLSurfaceView.Renderer {
         public GMath.V3<Float> up;
 
         Camera() {
-            eye = new GMath.V3<>(1f, 0.5f, 1f);
-            center = new GMath.V3<>(0f, 0.5f, 0f);
-            up = new GMath.V3<>(0f, 1.0f, 0f);
+            eye = new GMath.V3<>(0.5f, 0.5f, 1f);
+            center = new GMath.V3<>(0.5f, 0.5f, 0f);
+            up = new GMath.V3<>(1.0f, 0.0f, 0f); // @note set up vector like this to avoid to setup proper rotation on the object
         }
     }
 
@@ -76,13 +76,30 @@ public class CameraRenderer implements GLSurfaceView.Renderer {
         this.recognitionThread = recognitionThread;
     }
 
+    private void reverseBuffer(ByteBuffer buf, int width, int height) {
+        //long ts = System.currentTimeMillis();
+        int i = 0;
+        byte[] tmp = new byte[width * 4];
+        while (i++ < height / 2) {
+            buf.get(tmp);
+            System.arraycopy(buf.array(), buf.limit() - buf.position(), buf.array(), buf.position() - width * 4, width * 4);
+            System.arraycopy(tmp, 0, buf.array(), buf.limit() - buf.position(), width * 4);
+        }
+        buf.rewind();
+        //Log.d(TAG, "reverseBuffer took " + (System.currentTimeMillis() - ts) + "ms");
+    }
+
     private void postScreenBuffer() {
         screenBuffer = ByteBuffer.allocate(width * height * 4); // note: this does not need to be here
 
 
         GLES20.glReadPixels(0, 0, width, height, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, screenBuffer);
+
+        reverseBuffer(screenBuffer, width, height); // @note this is a waste of time since the buffer could be already reversed at this point
+
         final Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         bitmap.copyPixelsFromBuffer(screenBuffer);
+
         this.recognitionThread.postDelayed(new GHandlerThread.Job<RecognitionResult>() {
             @Override
             public RecognitionResult work() {
@@ -96,14 +113,14 @@ public class CameraRenderer implements GLSurfaceView.Renderer {
 
     @Override
     public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
-        GLES20.glClearColor(0.5f, 0.5f , 1.0f, 1.0f);
+        GLES20.glClearColor(0.5f, 0.5f, 1.0f, 1.0f);
 
-        mainShader = new FunkyCameraTextureShader(cameraIntoTexture.getTextureOES());
+        mainShader = new CameraTextureShader(cameraIntoTexture.getTextureOES());
         mainShader.init(context);
 
-        shapes = new ArrayList<>(1);
-        shapes.add(new QuadShape());
 
+        shapes = new ArrayList<>(1);
+        shapes.add(new QuadShape(1.0f, 1.0f, 0.5f, 0.5f));
     }
 
     @Override
@@ -113,7 +130,7 @@ public class CameraRenderer implements GLSurfaceView.Renderer {
 
 
         if (width > height) {
-            aspectRatio = width / ((float)height);
+            aspectRatio = width / ((float) height);
             left = -aspectRatio;
             right = aspectRatio;
         } else {
@@ -131,10 +148,10 @@ public class CameraRenderer implements GLSurfaceView.Renderer {
     @Override
     public void onDrawFrame(GL10 gl10) {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
-        GLES20.glClearColor(0.5f, (float) Math.sin(tick) , 0.4f, 1.0f);
+        GLES20.glClearColor(0.5f, 0.1f, 0.4f, 1.0f);
 
         cameraIntoTexture.update();
-        mainShader.draw(shapes, tick, width, height);
+        mainShader.draw(shapes, tick, width, height, viewProjectionMatrix);
 
         postScreenBuffer();
         tick += 0.1f;

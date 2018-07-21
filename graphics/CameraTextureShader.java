@@ -9,9 +9,10 @@ public class CameraTextureShader extends GShader{
             "attribute vec4 position;" +
                     "attribute vec2 uv;" +
                     "varying vec2 vuv;" +
+                    "uniform mat4 vp;" +
                     "void main() {" +
-                    "vuv = uv;" +
-                    "gl_Position = position;" +
+                        "vuv = uv;" +
+                        "gl_Position = vp * position;" +
                     "}";
 
     private static String fragment =

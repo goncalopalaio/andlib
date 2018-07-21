@@ -4,8 +4,6 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.gplio.fibrewallpaper.BuildConfig;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -57,13 +55,13 @@ public class TextFiles {
             }
         }
         catch (IOException e) {
-            if (BuildConfig.DEBUG) log("readString: error " + e);
+            log("readString: error " + e);
         } finally {
             if (br != null) {
                 try {
                     br.close();
                 } catch (IOException e) {
-                    if (BuildConfig.DEBUG) log("readString: error closing " + e);
+                    log("readString: error closing " + e);
                 }
             }
         }

@@ -19,7 +19,6 @@ public class GShader {
 
     protected String vertexShaderCode;
     protected String fragmentShaderCode;
-    private String assetTextureName = null;
     private int textureOES = -1;
     private int program;
     private int positionLoc;
@@ -29,6 +28,7 @@ public class GShader {
     private int uTimeLoc;
     private int uWidthLoc;
     private int uHeightLoc;
+    private boolean texture0Enabled = false;
 
     public GShader (String vertexShaderCode, String fragmentShaderCode) {
         this.vertexShaderCode = vertexShaderCode;
@@ -42,6 +42,12 @@ public class GShader {
     }
 
     public boolean init(Context context) {
+        return init(context, null);
+    }
+
+    public boolean init(Context context, Bitmap texture0) {
+        // @note passing the texture here is dumb.
+
         boolean error = compile();
         if (error) {
             return true;
@@ -53,13 +59,13 @@ public class GShader {
         positionLoc = GLES20.glGetAttribLocation(program, "position");
 
         if (positionLoc < 0) {
-            Log.e("init", "init: attribute positionLoc not found");
+            loge( "init: attribute positionLoc not found");
         }
 
         uvLoc = GLES20.glGetAttribLocation(program, "uv");
 
         if (uvLoc < 0) {
-            Log.e("init", "init: attribute uvLoc not found");
+            loge( "init: attribute uvLoc not found");
         }
 
 
@@ -79,19 +85,23 @@ public class GShader {
         // Extract this later
 
         // read texture.
-        assetTextureName = "texture0.png";
-        Bitmap textureBitmap = null;
+        /*assetTextureName = "texture0.png";
+        Bitmap texture0 = null;
         try {
-            textureBitmap = BitmapFactory.decodeStream(
+            texture0 = BitmapFactory.decodeStream(
                     context.getAssets().open(assetTextureName));
         } catch (IOException e) {
-            Log.e("init", "init: while decoding " + assetTextureName + " " + e);
+            loge( "init: while decoding " + assetTextureName + " " + e);
         }
 
-        if (textureBitmap == null) {
-            Log.e("init", "init: texture open failed. Ignoring texture.");
+        */
+
+        if (texture0 == null) {
+            loge( "init: texture open failed. Ignoring texture.");
             return false;
         }
+
+        texture0Enabled = true;
 
 
         // upload texture
@@ -104,7 +114,7 @@ public class GShader {
                 GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR_MIPMAP_LINEAR);
         GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D,
                 GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
-        GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, textureBitmap, 0);
+        GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, texture0, 0);
         GLES20.glGenerateMipmap(GLES20.GL_TEXTURE_2D);
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
         GLES20.glUseProgram(0);
@@ -135,7 +145,7 @@ public class GShader {
             GLES20.glUniform1f(uWidthLoc, width);
             GLES20.glUniform1f(uHeightLoc, height);
 
-            if (assetTextureName != null) {
+            if (texture0Enabled) {
                 GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
                 GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textures[0]);
                 GLES20.glUniform1i(utextureLoc, 0);
@@ -150,7 +160,7 @@ public class GShader {
             GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, shape.vertexCount);
 
 
-            if (assetTextureName != null) {
+            if (texture0Enabled) {
                 GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
                 GLES20.glUniform1i(utextureLoc, 0);
             }
@@ -165,5 +175,9 @@ public class GShader {
     private boolean compile() {
         program = ShaderUtil.createGLShaderProgram(vertexShaderCode, fragmentShaderCode);
         return program == -1;
+    }
+
+    private void loge(String msg) {
+        Log.e(getClass().getSimpleName(), msg);
     }
 }

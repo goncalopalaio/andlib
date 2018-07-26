@@ -72,7 +72,11 @@ public class GHandlerThread<W> {
     }
 
     public void postDelayed(final Job<W> job, long delayMillis) {
-        backgroundHandler.postDelayed(getJobRunnable(job), delayMillis);
+        if (backgroundHandler.getLooper().getThread().isAlive()) {
+            backgroundHandler.postDelayed(getJobRunnable(job), delayMillis);
+        } else {
+            Log.d(getClass().getName(), "postDelayed : tried to send message to a dead thread");
+        }
     }
 
     public void pause() {

@@ -1,51 +1,60 @@
 package com.gplio.andlib.graphics;
 
+import android.content.Context;
+import android.os.Environment;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.util.List;
 
 /**
  * Created by goncalopalaio on 23/07/18.
  */
 
 public class TextShape extends GShape {
-    public static float QUAD_SIDE = 0.1f;
-    private int textLength = 0;
+    private static final float QUAD_SIDE = 0.05f;
+    public static final String FONT_MAP_PATH = "/debug/easy_font_raw.png";
+    private static final float FONT_MAP_WIDTH = 453f;
+
     private int positionsLength;
     private int uvLength;
+    private int textLength;
+    private List<DebugText.Offsets> offsets;
 
-    public TextShape() {
+    public TextShape(Context context) {
         coordsPerVertex = 2;
+        vertexStride = coordsPerVertex * BYTES_PER_FLOAT;
 
+
+        String pathToFontMap = Environment.getExternalStorageDirectory() + FONT_MAP_PATH;
+        offsets = DebugText.parseEasyFont(pathToFontMap);
     }
 
+    /**
+     * Updates text buffer by re-generating and re-allocating all quads and uvs
+     * note: this will slooow
+     * @param text Text to display
+     */
     public void updateBuffer(String text) {
         textLength = text.length();
 
-        vertexBuffer = allocatePositionBuffer(text);
-        uvsBuffer = allocateUvsBuffer(textLength);
+        {
+            // Build quads
+            float[] quadPositions = getQuadPositions();
+            float[] quads = buildVertices(text, quadPositions);
 
-        vertexStride = coordsPerVertex * BYTES_PER_FLOAT;
-        vertexCount =  positionsLength / coordsPerVertex;
-    }
+            positionsLength = quads.length;
+            vertexBuffer = allocateBuffer(quads);
+            vertexCount = positionsLength / coordsPerVertex;
+        }
 
-
-    private FloatBuffer allocatePositionBuffer(String text) {
-        // @note this will slooow
-        float[] quadPositions = getQuadPositions();
-        float[] quads = fasterBuildArrayWithLength(text, quadPositions);
-
-        positionsLength = quads.length;
-        return allocateBuffer(quads);
-    }
-
-    private FloatBuffer allocateUvsBuffer(int textLength) {
-        // @note this will slooow
-        float[] uvPositions = getUvPositions();
-        float[] uvs = fasterBuildArrayWithLength(textLength, uvPositions);
-
-        uvLength = uvs.length;
-        return allocateBuffer(uvs);
+        {
+            // Build uvs
+            float[] uvs = buildUVs(text);
+            uvLength = uvs.length;
+            uvsBuffer = allocateBuffer(uvs);
+        }
     }
 
     private static FloatBuffer allocateBuffer(float[] values) {
@@ -58,50 +67,91 @@ public class TextShape extends GShape {
     }
 
 
-    private float[] fasterBuildArrayWithLength(String text, float[] baseArray) {
+    private float[] buildVertices(String text, float[] baseArray) {
+
+        // todo all of this is not ideal.
+
         int partialLen = baseArray.length;
         final int totalLen = partialLen * text.length();
 
         float[] quads = new float[totalLen];
 
+        float heightFactor = 0.5f;
+        float widthFactor = 0.95f;
+        float xFactor = 0.1f * widthFactor;
+        float yFactor = 0.1f * heightFactor;
 
         float xOffset = 0f;
+        float yOffset = 0f;
+        char[] chars = text.toCharArray();
+        int tix = 0;
+        for (int j = 0; j < totalLen; j += partialLen) {
+            char ch = chars[tix];
+            DebugText.Offsets offset = getOffset(ch);
+            float w = (offset.end - offset.start) * xFactor * widthFactor;
 
-        for (int j = 0; j < totalLen; j+=partialLen) {
+            if (ch == '\n') {
+                w = 0f;
+                xOffset = 0f;
+                yOffset -= yFactor;
+            }
 
             for (int i = 0; i < partialLen; i++) {
 
-                if (i %2 == 0) {
+                if (i % 2 == 0) {
                     // x's
-                    quads[j + i] = baseArray[i] + (xOffset);
+                    quads[j + i] = (baseArray[i] * w) + xOffset;
                 } else {
-                    quads[j + i] = baseArray[i];
+                    quads[j + i] = (baseArray[i] * heightFactor) + yOffset;
                 }
             }
-
-            xOffset += (QUAD_SIDE + 0.2f);
+            tix++;
+            xOffset += QUAD_SIDE;
         }
 
         return quads;
     }
 
 
-    private float[] fasterBuildArrayWithLength(int textLength, float[] baseArray) {
-        int partialLen = baseArray.length;
-        final int totalLen = partialLen * textLength;
+    private float[] buildUVs(String text) {
+
+        // todo all of this is not ideal.
+
+        float[] uvPositions = getUvPositions(0f, 1f);
+
+        int partialLen = uvPositions.length;
+        final int totalLen = partialLen * text.length();
 
         float[] quads = new float[totalLen];
 
-        for (int j = 0; j < totalLen; j+=partialLen) {
-            System.arraycopy(baseArray, 0, quads, j, partialLen);
+        char[] chars = text.toCharArray();
+        int tix = 0;
+        for (int j = 0; j < totalLen; j += partialLen) {
+
+            DebugText.Offsets offset = getOffset(chars[tix]);
+            uvPositions = getUvPositions(offset.start / FONT_MAP_WIDTH, offset.end / FONT_MAP_WIDTH);
+
+            System.arraycopy(uvPositions, 0, quads, j, partialLen);
+
+            tix++;
         }
 
         return quads;
     }
 
+    private DebugText.Offsets getOffset(char c) {
+
+        for (DebugText.Offsets offset : offsets) {
+            if (offset.correspondingChar == c) {
+                return offset;
+            }
+        }
+
+        return offsets.get(3); // default char
+    }
 
     private float[] getQuadPositions() {
-        return new float[] {
+        return new float[]{
                 QUAD_SIDE, -QUAD_SIDE,
                 QUAD_SIDE, QUAD_SIDE,
                 -QUAD_SIDE, QUAD_SIDE,
@@ -111,14 +161,15 @@ public class TextShape extends GShape {
         };
     }
 
-    private float[] getUvPositions() {
-        return new float[] {
-                1.0f, 0.0f,
-                1.0f, 1.0f,
-                0.0f, 1.0f,
-                0.0f, 1.0f,
-                0.0f, 0.0f,
-                1.0f, 0.0f
+    private float[] getUvPositions(float start, float end) {
+
+        return new float[]{
+                end, 0.0f,
+                end, -0.90f,
+                start, -0.90f,
+                start, -0.90f,
+                start, 0.0f,
+                end, 0.0f
         };
     }
 

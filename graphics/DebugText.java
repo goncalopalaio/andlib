@@ -15,22 +15,18 @@ import java.util.List;
  */
 
 public class DebugText {
-    private final int charStart = 32;
-    private final int charEnd = 126;
-    private final int totalChars = 126 - 32;
 
     /**
      * Parses easy_font_raw.png from stb_easy_font
      * ascii 32 -> 126
      *       space -> ~
      */
-    public static void parseEasyFont(Context context) {
-        String path = Environment.getExternalStorageDirectory() + "/debug/easy_font_raw.png";
-        Bitmap bitmap = BitmapFactory.decodeFile(path);
+    public static List<Offsets> parseEasyFont(String pathToFontMap) {
+        Bitmap bitmap = BitmapFactory.decodeFile(pathToFontMap);
 
         if (bitmap == null) {
-            log("Could not decode file " + path);
-            return;
+            log("Could not decode file " + pathToFontMap);
+            return null;
         }
 
         int width = bitmap.getWidth();
@@ -40,40 +36,34 @@ public class DebugText {
         //String s = "o";
         int previousStart = 0;
         List<Offsets> offsets = new LinkedList<>();
+        char c = 32;
         for (int i = 1; i < width; i++) {
             int pixel = bitmap.getPixel(i,0);
 
             int red = Color.red(pixel);
             if (red == 0) {
-                offsets.add(new Offsets(previousStart, i-1));
+                offsets.add(new Offsets(previousStart, i-1, c));
                 previousStart = i;
+                c++;
             }
-
-            /*if (red == 0) {
-                s +="o";
-            } else {
-                s+="#";
-            }*/
         }
 
-        //log("s: " + s);
-
-        for (Offsets offset : offsets) {
-            log("offset: " + offset.start + " -> " + offset.end);
-        }
+        return offsets;
     }
 
     private static void log(String m) {
         Log.d("DebugText", m);
     }
 
-    private static class Offsets {
+    static class Offsets {
         int start = 0;
         int end = 0;
+        char correspondingChar;
 
-        public Offsets(int start, int end) {
+        Offsets(int start, int end, char correspondingChar) {
             this.start = start;
             this.end = end;
+            this.correspondingChar = correspondingChar;
         }
     }
 }

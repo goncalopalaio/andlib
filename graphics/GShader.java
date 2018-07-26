@@ -111,9 +111,9 @@ public class GShader {
         GLES20.glGenTextures(textures.length, textures, 0);
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textures[0]);
         GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D,
-                GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR_MIPMAP_LINEAR);
+                GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_NEAREST);
         GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D,
-                GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
+                GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_NEAREST);
         GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, texture0, 0);
         GLES20.glGenerateMipmap(GLES20.GL_TEXTURE_2D);
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
@@ -138,7 +138,7 @@ public class GShader {
             if (shape.uvsBuffer != null) {
                 GLES20.glVertexAttribPointer(
                         uvLoc, shape.uvsPerVertex, GLES20.GL_FLOAT,
-                        false, 0, shape.uvsBuffer);
+                        false, 2 * 4, shape.uvsBuffer);
             }
 
             GLES20.glUniform1f(uTimeLoc, time);

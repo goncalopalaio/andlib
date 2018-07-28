@@ -27,7 +27,7 @@ public class GMath {
         public T y;
         public T z;
 
-        V3(T x, T y, T z) {
+        public V3(T x, T y, T z) {
             this.x = x;
             this.y = y;
             this.z = z;

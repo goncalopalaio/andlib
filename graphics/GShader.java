@@ -28,6 +28,7 @@ public class GShader {
     private int uTimeLoc;
     private int uWidthLoc;
     private int uHeightLoc;
+    private boolean texture0Enabled = false;
     private int uViewProjectionLoc;
 
     public GShader (String vertexShaderCode, String fragmentShaderCode) {
@@ -134,7 +135,9 @@ public class GShader {
         GLES20.glUniform1f(uTimeLoc, time);
         GLES20.glUniform1f(uWidthLoc, width);
         GLES20.glUniform1f(uHeightLoc, height);
-        GLES20.glUniformMatrix4fv(uViewProjectionLoc, 1, false, viewProjectionMatrix, 0);
+        if (viewProjectionMatrix != null) {
+            GLES20.glUniformMatrix4fv(uViewProjectionLoc, 1, false, viewProjectionMatrix, 0);
+        }
 
         for (GShape shape : shapes) {
             GLES20.glVertexAttribPointer(

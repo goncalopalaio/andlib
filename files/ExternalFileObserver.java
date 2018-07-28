@@ -4,8 +4,6 @@ import android.os.FileObserver;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.gplio.faceoff.BuildConfig;
-
 import java.util.LinkedList;
 import java.util.List;
 
@@ -40,7 +38,7 @@ public class ExternalFileObserver extends FileObserver {
     @Override
     public void onEvent(int event, @Nullable String path) {
         if (event == MODIFY || event == CREATE) {
-            log("Received MODIFY or CREATE");
+            log("Received MODIFY or CREATE : " + path);
             for (Listener listener : listeners) {
                 listener.onEvent();
             }

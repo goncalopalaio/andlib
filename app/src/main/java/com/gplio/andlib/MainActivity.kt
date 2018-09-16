@@ -1,7 +1,9 @@
 package com.gplio.andlib
 
+import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import com.gplio.andlibrary.debug.HotValues
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
@@ -12,6 +14,13 @@ class MainActivity : AppCompatActivity() {
 
         // Example of a call to a native method
         sample_text.text = stringFromJNI()
+
+        HotValues.launchService(this)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        HotValues.onActivityResult(this, requestCode)
+        super.onActivityResult(requestCode, resultCode, data)
     }
 
     /**

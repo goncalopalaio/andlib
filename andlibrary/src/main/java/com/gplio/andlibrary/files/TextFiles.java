@@ -1,6 +1,7 @@
-package com.gplio.andlib.files;
+package com.gplio.andlibrary.files;
 
 import android.content.Context;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
@@ -19,8 +20,11 @@ import java.io.InputStreamReader;
 public class TextFiles {
 
     @NonNull
-    public static String readTextFromSdcard(String fullPath, String defaultText) {
-        File file = new File(fullPath);
+    public static String readTextFromSdcard(String pathInSdcard, String defaultText) {
+        File file = new File(Environment.getExternalStorageDirectory(), pathInSdcard);
+
+        log("readTextFromSdcard: loading -> " + file);
+
         try {
             FileReader fileReader = new FileReader(file);
             return readString(fileReader, defaultText);

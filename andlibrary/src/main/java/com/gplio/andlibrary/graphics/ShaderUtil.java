@@ -1,4 +1,4 @@
-package com.gplio.andlib.graphics;
+package com.gplio.andlibrary.graphics;
 
 import android.content.Context;
 import android.opengl.GLES20;

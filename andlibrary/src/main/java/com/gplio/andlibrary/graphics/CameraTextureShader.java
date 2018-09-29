@@ -1,4 +1,4 @@
-package com.gplio.andlib.graphics;
+package com.gplio.andlibrary.graphics;
 
 /**
  * Created by goncalopalaio on 26/05/18.

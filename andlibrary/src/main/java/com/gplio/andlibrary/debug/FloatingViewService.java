@@ -24,9 +24,54 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class FloatingViewService extends Service {
+    private static int REQUEST_CODE = 13235;
+    private static String TAG = "WarmValue";
     private LinearLayout layout;
+    /***
+     * TODO Handle touch event pass through correctly
+     * TODO Make the views movable
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     */
+
 
     public FloatingViewService() {
+    }
+
+    @TargetApi(Build.VERSION_CODES.M)
+    public static void launchService(Activity currentActivity) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            Log.d(TAG, "#FIXME not supported prior to M");
+            return;
+        }
+        if (Settings.canDrawOverlays(currentActivity)) {
+            currentActivity.startService(new Intent(currentActivity, FloatingViewService.class));
+            currentActivity.finish();
+            return;
+        }
+
+        Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + currentActivity.getPackageName()));
+        currentActivity.startActivityForResult(intent, REQUEST_CODE);
+    }
+
+    @TargetApi(Build.VERSION_CODES.M)
+    public static void onActivityResult(Activity activity, int requestCode) {
+        if (requestCode != REQUEST_CODE) {
+            return;
+        }
+
+        if (!Settings.canDrawOverlays(activity)) {
+            Toast.makeText(activity, "Cannot draw overlays without permission...", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + activity.getPackageName()));
+        activity.startActivityForResult(intent, REQUEST_CODE);
     }
 
     @Nullable

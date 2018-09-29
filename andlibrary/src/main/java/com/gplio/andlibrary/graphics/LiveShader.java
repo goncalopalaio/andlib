@@ -1,11 +1,11 @@
-package com.gplio.andlib.graphics;
+package com.gplio.andlibrary.graphics;
+
+import com.gplio.andlib.files.ExternalFileObserver;
+import com.gplio.andlibrary.files.TextFiles;
 
 import android.content.Context;
 import android.support.annotation.Nullable;
 import android.util.Log;
-
-import com.gplio.andlib.files.ExternalFileObserver;
-import com.gplio.andlib.files.TextFiles;
 
 /**
  * Created by goncalopalaio on 19/07/18.
